@@ -26,7 +26,6 @@ namespace BusinessRules.Tests
             // 1124s
             Console.Out.WriteLine("Execution time async: " + sw.Elapsed.TotalSeconds); sw.Start();
             
-
             
             sw.Restart();
 
@@ -105,18 +104,13 @@ namespace BusinessRules.Tests
             Console.Out.WriteLine("Execution time sync: " + sw.Elapsed.TotalSeconds);
         }
 
-        private static async Task<string[]> SimulateSomeWorkAndCallItSelfAsync(int msDelay, int moreDeepCalls)
+        private static async Task SimulateSomeWorkAndCallItSelfAsync(int msDelay, int moreDeepCalls)
         {
             await Task.Delay(TimeSpan.FromMilliseconds(msDelay));
 
             if (moreDeepCalls > 0)
             {
-                return await SimulateSomeWorkAndCallItSelfAsync(msDelay, moreDeepCalls - 1);
-            }
-            else
-            {
-                //Read file...
-                return await File.ReadAllLinesAsync(@"C:\\temp\\allMetrics.csv");
+                await SimulateSomeWorkAndCallItSelfAsync(msDelay, moreDeepCalls - 1);
             }
         }
 
@@ -128,7 +122,6 @@ namespace BusinessRules.Tests
 
                 return SimulateSomeWorkAndCallItSelfAltAsync(msDelay, moreDeepCalls - 1);
             }
-
 
             return Task.Delay(TimeSpan.FromMilliseconds(msDelay));
         }
@@ -149,7 +142,7 @@ namespace BusinessRules.Tests
 
             if (moreDeepCalls > 0)
             {
-                return await SimulateSomeWorkAndCallItSelfAsync(msDelay, moreDeepCalls - 1);
+                return await SimulateSomeRealWorkAndCallItSelfAsync(msDelay, moreDeepCalls - 1);
             }
 
             //Read file...
