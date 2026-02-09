@@ -16,58 +16,68 @@ namespace BusinessRules.Tests
             //The test is measuring 100k requests like async Controller::method -> calls async "Service"::method -> calls few other "async" and await some long-running operations (like db, IO etc)
             var sw = new Stopwatch();
 
+            var tasks = new Task[100000];
+
             sw.Start();
-            Parallel.For(0, 100 * 1000, (i) =>
-            {
-                Task.WaitAll(SimulateSomeWorkAndCallItSelfAsync(150, 10));
-            });
 
-            Console.Out.WriteLine("Execution time async: " + sw.Elapsed.TotalSeconds); sw.Start();
+            for (var i = 0; i < tasks.Length; i++)
+            {
+                tasks[i] = SimulateSomeWorkAndCallItSelfAsync(150, 10);
+            }
+
+            Task.WaitAll(tasks);
+
+            Console.WriteLine("Execution time async: " + sw.Elapsed.TotalSeconds); sw.Start();
+
+            var tasks2 = new Task[100000];
 
             sw.Restart();
 
-            Parallel.For(0, 100 * 1000, (i) =>
+            for (var i = 0; i < tasks2.Length; i++)
             {
-                Task.WaitAll(SimulateSomeWorkAndCallItSelfAltAsync(150, 10));
-            });
+                tasks2[i] = SimulateSomeWorkAndCallItSelfAltAsync(150, 10);
+            }
 
-            Console.Out.WriteLine("Execution time async2: " + sw.Elapsed.TotalSeconds); sw.Start();
+            Task.WaitAll(tasks2);
+
+            Console.WriteLine("Execution time async2: " + sw.Elapsed.TotalSeconds); sw.Start();
 
             sw.Restart();
 
-            Parallel.For(0, 100 * 1000, (i) =>
+            Parallel.For(0, 100000, (i) =>
             {
                 SimulateSomeWorkAndCallItSelf(150, 10);
             });
 
-            Console.Out.WriteLine("Execution time sync: " + sw.Elapsed.TotalSeconds);
+            Console.WriteLine("Execution time sync: " + sw.Elapsed.TotalSeconds);
 
-            //Execution time async: 1124s
-            //Execution time async2: 567s
-            //Execution time sync: 105s
+            //Execution time async: 1,26s
+            //Execution time async2: 2,29s
+            //Execution time sync: ???s
         }
 
         private static async Task SimulateSomeWorkAndCallItSelfAsync(int msDelay, int moreDeepCalls)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(msDelay));
+            var subtask = Task.Delay(TimeSpan.FromMilliseconds(msDelay));
 
             if (moreDeepCalls > 0)
             {
                 await SimulateSomeWorkAndCallItSelfAsync(msDelay, moreDeepCalls - 1);
             }
+
+            await subtask;
         }
 
         private static Task SimulateSomeWorkAndCallItSelfAltAsync(int msDelay, int moreDeepCalls)
         {
-            if (moreDeepCalls > 0)
+            if (moreDeepCalls <= 0)
             {
-                Task.Delay(TimeSpan.FromMilliseconds(msDelay)).Wait();
-
-                return SimulateSomeWorkAndCallItSelfAltAsync(msDelay, moreDeepCalls - 1);
+                return Task.Delay(msDelay);
             }
 
-
-            return Task.Delay(TimeSpan.FromMilliseconds(msDelay));
+            return Task.Delay(msDelay)
+                .ContinueWith(_ => SimulateSomeWorkAndCallItSelfAltAsync(msDelay, moreDeepCalls - 1), TaskContinuationOptions.ExecuteSynchronously)
+                .Unwrap();
         }
 
         private static void SimulateSomeWorkAndCallItSelf(int msDelay, int moreDeepCalls)
