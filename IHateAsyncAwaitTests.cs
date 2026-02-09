@@ -17,7 +17,7 @@ namespace BusinessRules.Tests
         {
             var sw = new Stopwatch();
 
-            /*sw.Start();
+            sw.Start();
             Parallel.For(0, 100 * 1000, new ParallelOptions(){MaxDegreeOfParallelism = 100 * 1000}, (i) =>
             {
                 SimulateSomeWorkAndCallItSelfAsync(150, 10).WaitAndUnwrapException();
@@ -25,9 +25,9 @@ namespace BusinessRules.Tests
 
             // 1124s
             Console.Out.WriteLine("Execution time async: " + sw.Elapsed.TotalSeconds); sw.Start();
-            */
+            
 
-            /*
+            
             sw.Restart();
 
             Parallel.For(0, 100 * 1000, (i) =>
@@ -37,15 +37,14 @@ namespace BusinessRules.Tests
 
             //567s
             Console.Out.WriteLine("Execution time async2: " + sw.Elapsed.TotalSeconds); sw.Start();
-            */
-
-            /*
+            
+            
             sw.Restart();
             Task.WaitAll(Enumerable.Range(0, 100 * 1000).Select(i => SimulateSomeWorkAndCallItSelfAsync(150, 10)).ToArray());
 
             //2.5s
             Console.Out.WriteLine("Execution time async (method 2): " + sw.Elapsed.TotalSeconds);
-            */
+            
 
             sw.Restart();
             Task.WaitAll(Enumerable.Range(0, 100 * 1000).Select(i => new Task(() => SimulateSomeWorkAndCallItSelf(150, 10))).ToArray());
@@ -61,14 +60,6 @@ namespace BusinessRules.Tests
 
             //105s
             Console.Out.WriteLine("Execution time sync: " + sw.Elapsed.TotalSeconds);
-            
-
-            //Execution time async: 1124s
-            //Execution time async2: 567s
-            //Execution time async method 2: 2.5s
-
-
-            //Execution time sync: 105s
         }
 
         [TestMethod]
