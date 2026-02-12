@@ -18,7 +18,7 @@ namespace BusinessRules.Tests
             var sw = new Stopwatch();
 
             sw.Start();
-            Parallel.For(0, 100 * 1000, new ParallelOptions(){MaxDegreeOfParallelism = 100 * 1000}, (i) =>
+            Parallel.For(0, 100 * 1000, new ParallelOptions(), (i) =>
             {
                 SimulateSomeWorkAndCallItSelfAsync(150, 10).WaitAndUnwrapException();
             });
